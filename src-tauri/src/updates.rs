@@ -14,10 +14,11 @@ pub fn update_status(app:tauri::AppHandle)->UpdateStatus {
 #[cfg(test)]
 mod tests {
  #[test]
- fn checked_in_updater_config_can_initialize_without_a_published_endpoint() {
+ fn checked_in_updater_config_uses_signed_github_releases() {
   let config:serde_json::Value=serde_json::from_str(include_str!("../tauri.conf.json")).unwrap();
   let updater:tauri_plugin_updater::Config=serde_json::from_value(config["plugins"]["updater"].clone()).expect("registered updater requires a non-null Config with pubkey");
-  assert!(updater.endpoints.is_empty());
-  assert!(updater.pubkey.is_empty());
+  assert_eq!(updater.endpoints.len(),1);
+  assert_eq!(updater.endpoints[0].as_str(),"https://github.com/b1inkie/dst_tool_swapfit/releases/latest/download/latest.json");
+  assert!(!updater.pubkey.is_empty());
  }
 }

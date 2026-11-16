@@ -1,0 +1,8 @@
+{
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "resources": {"../data/resources/": "resources/"},
+    "windows": {"nsis": {"installMode": "currentUser", "displayLanguageSelector": true, "languages": ["SimpChinese", "English"]}}
+  }
+}

@@ -8,4 +8,7 @@ output/
 data/output/
 release/
 src-tauri/gen/
-
+*.code-workspace
+release-upload/
+*.key
+*.key.pub
