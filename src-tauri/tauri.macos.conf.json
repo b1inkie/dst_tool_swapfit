@@ -1,0 +1,9 @@
+{
+  "app": {"macOSPrivateApi": true},
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg"],
+    "resources": {"../data/resources/": "resources/"},
+    "macOS": {"minimumSystemVersion": "11.0", "signingIdentity": "-"}
+  }
+}

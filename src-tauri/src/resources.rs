@@ -24,6 +24,24 @@ fn base()->Result<PathBuf,String>{
  else{Ok(data_base(std::env::current_exe().map_err(|e|e.to_string())?.parent().ok_or("程序目录无效")?,false))}
 }
 fn data_base(root:&Path,development:bool)->PathBuf{if development{root.join("data")}else{root.to_path_buf()}}
+fn resource_root()->Result<PathBuf,String>{
+ #[cfg(all(target_os="macos",not(debug_assertions)))]
+ {let exe=std::env::current_exe().map_err(|e|e.to_string())?;return mac_resource_root(&exe);}
+ #[cfg(not(all(target_os="macos",not(debug_assertions))))]
+ {Ok(base()?.join("resources"))}
+}
+#[cfg(any(target_os="macos",test))]
+fn mac_resource_root(exe:&Path)->Result<PathBuf,String>{
+ let macos=exe.parent().ok_or("应用路径无效")?;let contents=macos.parent().ok_or("应用包路径无效")?;
+ if macos.file_name()!=Some(std::ffi::OsStr::new("MacOS"))||contents.file_name()!=Some(std::ffi::OsStr::new("Contents")){return Err("请从完整的 DST SwapFit.app 启动".into())}
+ Ok(contents.join("Resources/resources"))
+}
+fn output_root()->Result<PathBuf,String>{
+ #[cfg(all(target_os="macos",not(debug_assertions)))]
+ {let home=std::env::var_os("HOME").ok_or("无法定位用户文稿目录")?;return Ok(PathBuf::from(home).join("Documents/DST SwapFit/output"));}
+ #[cfg(not(all(target_os="macos",not(debug_assertions))))]
+ {Ok(base()?.join("output"))}
+}
 fn relative(path:&str)->Result<PathBuf,String>{
  let normalized=path.replace('\\',"/");let p=PathBuf::from(&normalized);
  if normalized.is_empty()||normalized.contains(':')||p.components().any(|c|!matches!(c,Component::Normal(_)|Component::CurDir)){return Err("资源相对路径不安全".into())}Ok(p)
@@ -34,7 +52,7 @@ fn inside(root:&Path,path:&str)->Result<PathBuf,String>{
 }
 fn read(path:&Path)->Result<Vec<u8>,String>{let m=fs::metadata(path).map_err(|e|e.to_string())?;if !m.is_file()||m.len()>LIMIT{return Err("资源类型或大小超出限制".into())}fs::read(path).map_err(|e|e.to_string())}
 fn manifest()->Result<(PathBuf,Vec<Preset>),String>{
- let root=base()?.join("resources");let raw=read(&inside(&root,"presets.json")?)?;
+ let root=resource_root()?;let raw=read(&inside(&root,"presets.json")?)?;
  let m:Manifest=serde_json::from_slice(&raw).map_err(|e|format!("预设配置错误：{e}"))?;
  if m.version!=1||m.presets.len()>100{return Err("预设版本或数量不支持".into())}
  let mut ids=std::collections::HashSet::new();for p in &m.presets{if p.id.is_empty()||!ids.insert(p.id.clone()){return Err("预设ID为空或重复".into())}relative(&p.scene)?;if let Some(ref build)=p.scene_build{relative(build)?;}relative(&p.template_dir)?;relative(&p.scml)?;relative(&p.image)?;if p.export_placeholder.is_empty(){return Err("导出名称占位符不能为空".into())}}
@@ -52,7 +70,7 @@ pub fn load_preset(id:String,state:tauri::State<'_,crate::Imports>)->Result<Vec<
 }
 #[tauri::command]
 pub fn load_handheld_scene()->Result<Vec<FileData>,String>{
- let root=base()?.join("resources");["player_idles.zip","wilson.zip"].iter().map(|name|{let path=inside(&root,name)?;Ok(FileData{path:path.to_string_lossy().into_owned(),bytes:read(&path)?})}).collect()
+ let root=resource_root()?;["player_idles.zip","wilson.zip"].iter().map(|name|{let path=inside(&root,name)?;Ok(FileData{path:path.to_string_lossy().into_owned(),bytes:read(&path)?})}).collect()
 }
 fn png_size(bytes:&[u8])->Result<(u32,u32),String>{if bytes.len()<24||&bytes[..8]!=b"\x89PNG\r\n\x1a\n"||&bytes[12..16]!=b"IHDR"{return Err("替换图层必须为 PNG".into())}Ok((u32::from_be_bytes(bytes[16..20].try_into().unwrap()),u32::from_be_bytes(bytes[20..24].try_into().unwrap())))}
 fn valid_dish_name(name:&str)->bool{
@@ -78,7 +96,7 @@ fn reserve_output_kind(root:&Path,stem:&str,kind:WorkspaceKind)->Result<PathBuf,
 }
 #[tauri::command]
 pub fn prepare_cooking_output(file_name:String,workspace:Option<WorkspaceKind>,state:tauri::State<'_,OutputJobs>)->Result<OutputJob,String>{
- let path=reserve_output_kind(&base()?.join("output"),&output_stem(&file_name),workspace.unwrap_or_default())?;
+ let path=reserve_output_kind(&output_root()?,&output_stem(&file_name),workspace.unwrap_or_default())?;
  let id=path.file_name().ok_or("目录名无效")?.to_string_lossy().into_owned();
  state.0.lock().map_err(|_|"输出锁失败")?.insert(id.clone(),path.clone());
  Ok(OutputJob{id,path:path.to_string_lossy().into_owned()})
@@ -137,7 +155,7 @@ fn export_targets(p:&Preset,dir:&Path,png:&[u8])->Result<Vec<PathBuf>,String>{
 #[tauri::command]
 pub fn export_cooking(id:String,png:Vec<u8>,name:String,job_id:String,state:tauri::State<'_,OutputJobs>)->Result<String,String>{
  let mut jobs=state.0.lock().map_err(|_|"输出锁失败")?;
- let original=jobs.get(&job_id).ok_or("输出任务不存在，请重新导入图片")?.clone();let root=base()?.join("output");
+ let original=jobs.get(&job_id).ok_or("输出任务不存在，请重新导入图片")?.clone();let root=output_root()?;
  if original.parent()!=Some(root.as_path()){return Err("输出路径无效".into())}
  let (_,p,dir)=preset(&id)?;
  let stem=job_id.strip_prefix(p.workspace.prefix()).ok_or("输出任务与预设工作区不匹配")?;
@@ -154,7 +172,7 @@ fn completed_directory(root:&Path,expected:&Path,requested:&Path)->Result<PathBu
 #[tauri::command]
 pub fn open_cooking_output(job_id:String,path:String,state:tauri::State<'_,OutputJobs>)->Result<(),String>{
  let completed=state.1.lock().map_err(|_|"输出锁失败")?;let expected=completed.get(&job_id).ok_or("请先完成制作")?;
- let directory=completed_directory(&base()?.join("output"),expected,Path::new(&path))?;
+ let directory=completed_directory(&output_root()?,expected,Path::new(&path))?;
  #[cfg(target_os="windows")]
  let mut command={let windows=std::env::var_os("SystemRoot").ok_or("无法定位Windows目录")?;std::process::Command::new(PathBuf::from(windows).join("explorer.exe"))};
  #[cfg(target_os="macos")]
@@ -173,6 +191,10 @@ fn export_next(p:&Preset,dir:&Path,png:&[u8],name:&str,root:&Path,original:&Path
 }
 #[cfg(test)]
 mod tests{
+ #[test]fn mac_bundle_resources_use_contents_resources(){
+  assert_eq!(mac_resource_root(Path::new("/Applications/DST SwapFit.app/Contents/MacOS/dst-swapfit")).unwrap(),Path::new("/Applications/DST SwapFit.app/Contents/Resources/resources"));
+  assert!(mac_resource_root(Path::new("/tmp/dst-swapfit")).is_err());
+ }
  #[test]fn development_and_portable_data_layouts_are_distinct(){
   let root=Path::new("test-project");assert_eq!(data_base(root,true),root.join("data"));assert_eq!(data_base(root,false),root);
   assert_eq!(data_base(root,true).join("resources"),root.join("data/resources"));assert_eq!(data_base(root,false).join("output"),root.join("output"));
