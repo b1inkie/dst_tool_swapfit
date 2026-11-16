@@ -1,0 +1,6 @@
+# Template SCML must preserve the supplied bytes on every build platform.
+*.scml -text
+*.png binary
+*.zip binary
+*.ico binary
+*.icns binary
