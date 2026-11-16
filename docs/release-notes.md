@@ -1,7 +1,8 @@
-料理与手持贴图对位：拖入图片、调整位置/缩放/旋转，制作保持原动画和红点的模板工程。
+设置页新增 GitHub 仓库与历史版本下载链接（tauri-plugin-opener，仅允许本仓库 URL）；修复按钮回调。发布 v0.1.1。
 
-设置页提供签名更新检查、下载进度、重试与安装重启。安装前请先完成当前制作。
+改进：
+- 设置页可直接打开 GitHub 仓库与历史版本下载页（仅允许本仓库地址）。
+- start.bat 自动清理残留的 1420 端口开发服务。
+- 新增 MIT 许可证与 NOTICES 资源归属说明。
 
-Windows 使用每用户 NSIS 安装包；Mac 提供 Intel 与 Apple Silicon 包。macOS 当前为 ad-hoc 签名，未经过 Apple Developer ID 签名和公证，可能被 Gatekeeper 拦截。Apple Silicon 产物由 Intel Mac 交叉编译，尚需 ARM 实机交互验证。
-
-Windows 输出位于程序目录 output；macOS 输出位于 ~/Documents/DST SwapFit/output。请备份自定义模板；标准 resources 随版本更新。制作输出不属于安装文件。
+安装本版后，v0.1.0 用户可在设置页检查并安装更新；安装会关闭应用，请先完成当前制作。macOS 仍为 ad-hoc 签名未公证，Gatekeeper 可能拦截；Apple Silicon 产物由 Intel Mac 交叉编译，未做 ARM 实机交互验收。

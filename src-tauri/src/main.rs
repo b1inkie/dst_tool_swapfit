@@ -42,7 +42,7 @@ fn read_related(source: String, relative: String, state: State<'_,Imports>) -> R
     limited_read(&resolved,64*1024*1024)
 }
 fn main() {
-    tauri::Builder::default().plugin(tauri_plugin_dialog::init()).plugin(tauri_plugin_updater::Builder::new().build()).plugin(tauri_plugin_process::init()).manage(Imports::default()).manage(resources::OutputJobs::default())
+    tauri::Builder::default().plugin(tauri_plugin_dialog::init()).plugin(tauri_plugin_updater::Builder::new().build()).plugin(tauri_plugin_process::init()).plugin(tauri_plugin_opener::init()).manage(Imports::default()).manage(resources::OutputJobs::default())
         .invoke_handler(tauri::generate_handler![updates::update_status,read_imports,read_related,resources::resource_catalog,resources::load_preset,resources::load_handheld_scene,resources::prepare_cooking_output,resources::export_cooking,resources::open_cooking_output])
         .run(tauri::generate_context!()).expect("启动失败");
 }

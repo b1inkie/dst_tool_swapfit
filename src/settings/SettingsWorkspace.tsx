@@ -1,6 +1,11 @@
 import {useEffect,useRef,useState} from 'react'
 import {invoke,isTauri} from '@tauri-apps/api/core'
 import {check,type Update} from '@tauri-apps/plugin-updater'
+import {openUrl} from '@tauri-apps/plugin-opener'
+const repository='https://github.com/b1inkie/dst_tool_swapfit'
+async function openLink(url:string,setError:(message:string)=>void){
+ try{isTauri()?await openUrl(url):window.open(url,'_blank','noopener')}catch(error){setError(`无法打开链接：${String(error)}`)}
+}
 import {relaunch} from '@tauri-apps/plugin-process'
 import './settings.css'
 type Status={version:string;enabled:boolean;reason?:string}
@@ -32,7 +37,7 @@ export default function SettingsWorkspace(){
  const busy=['checking','downloading','installing'].includes(phase)
  const titles:Record<Phase,string>={idle:'检查新版本',checking:'正在检查更新…',latest:'当前已是最新版本',available:'发现新版本',downloading:'正在下载更新…',ready:'更新已准备就绪',installing:'正在启动安装程序…',installed:'更新已安装，等待重启'}
  return <main className="settings-workspace"><header><strong>设置</strong><span>版本与更新</span></header><div className="settings-body">
- <section className="settings-card"><div className="settings-brand"><div className="settings-mark" aria-hidden="true">SF</div><div><h2>DST SwapFit</h2><p>贴图对位器</p></div><span className="settings-version">v{status?.version??'…'}</span></div></section>
+ <section className="settings-card"><div className="settings-brand"><div className="settings-mark" aria-hidden="true">SF</div><div><h2>DST SwapFit</h2><p>贴图对位器</p><div className="settings-links"><button className="settings-link" onClick={()=>void openLink(repository,setError)}>GitHub 仓库</button><button className="settings-link" onClick={()=>void openLink(repository+'/releases',setError)}>历史版本下载</button></div></div><span className="settings-version">v{status?.version??'…'}</span></div></section>
  <section className="settings-card" aria-labelledby="update-title"><h3 id="update-title">软件更新</h3><p className="update-status" role="status">{status?.enabled?titles[phase]:status?.reason??'正在读取版本信息…'}</p>{checked&&<small>上次检查：{checked}</small>}
  {error&&<p className="settings-error" role="alert">{error}</p>}
  {release&&<div className="release-notes"><strong>新版本 v{release.version}</strong><p>{release.body?.trim()||'此版本未提供更新说明。'}</p></div>}

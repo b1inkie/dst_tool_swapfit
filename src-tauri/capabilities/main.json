@@ -6,6 +6,7 @@
     "core:default","dialog:allow-open",
     "updater:default",
     "process:allow-restart",
+    {"identifier":"opener:allow-open-url","allow":[{"url":"https://github.com/b1inkie/dst_tool_swapfit*"}]},
     "core:window:allow-minimize","core:window:allow-toggle-maximize",
     "core:window:allow-internal-toggle-maximize","core:window:allow-close",
     "core:window:allow-start-dragging"
