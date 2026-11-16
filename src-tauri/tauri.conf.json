@@ -10,6 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [{
       "label":"main","title":"DST SwapFit",
       "width":1440,"height":920,"minWidth":1000,"minHeight":700,
