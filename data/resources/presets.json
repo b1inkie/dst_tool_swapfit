@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "presets": [
+    {
+      "id": "cook-pot-dish",
+      "name": "锅内料理 · 标准模板",
+      "scene": "cook_pot.zip",
+      "templateDir": "dish_xplaceholderx",
+      "scml": "dish_xplaceholderx.scml",
+      "image": "dish_xplaceholderx/dish_xplaceholderx-0.png",
+      "targetSymbol": "swap_cooked",
+      "sourceSymbol": "dish_xplaceholderx",
+      "exportPlaceholder": "xplaceholderx",
+      "animation": "idle_full",
+      "facing": 255,
+      "fixedFrame": 0
+    },
+    {
+      "id": "wilson-handheld",
+      "workspace": "handheld",
+      "name": "Wilson 手持 · 标准模板",
+      "scene": "player_idles.zip",
+      "sceneBuild": "wilson.zip",
+      "templateDir": "swap_xplaceholderx",
+      "scml": "swap_xplaceholderx.scml",
+      "image": "swap_xplaceholderx/swap_xplaceholderx-0-0.png",
+      "applyAllImages": true,
+      "targetSymbol": "swap_object",
+      "sourceSymbol": "swap_xplaceholderx",
+      "exportPlaceholder": "xplaceholderx",
+      "animation": "idle_loop_nofaced",
+      "facing": 255,
+      "fixedFrame": 0
+    }
+  ]
+}

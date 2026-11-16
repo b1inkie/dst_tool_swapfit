@@ -1,0 +1,58 @@
+.workbench{height:100%;display:flex;min-width:1000px}
+.activity-bar{width:66px;flex-shrink:0;display:flex;flex-direction:column;gap:5px;padding-top:12px;background:#141008;border-right:1px solid #3f3423}
+.activity-bar button{position:relative;width:100%;padding:12px 2px;border:0;border-radius:0;background:none;color:#8b7d61}
+.activity-bar button:hover:not(.active){background:transparent;color:#b7a887}
+.activity-bar button>span{display:block;font-size:25px;line-height:30px}
+.activity-bar small{font-size:10px;color:inherit;margin-top:5px}
+.activity-bar button.active{color:#ffb340;background:#2b2215}
+.activity-bar button.active:before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:#ffb340}
+.activity-bar button:last-child{margin-top:auto;margin-bottom:10px}
+.activity-bar .activity-image-icon{display:block;width:30px;height:30px;margin:0 auto;object-fit:contain;pointer-events:none;user-select:none}
+.workspace-host{flex:1;min-width:0;height:100%}
+.workspace-view{height:100%;min-width:0}
+.workspace-view[hidden]{display:none}
+.workspace-view main{min-width:0}
+.cooking-tabs{display:flex;gap:8px;margin-bottom:12px}
+.cooking-workspace aside>small{overflow-wrap:anywhere}
+.cooking-workspace aside input{display:block;width:100%;margin:6px 0 12px}
+.cooking-workspace aside button{white-space:normal}
+.cooking-workspace [role=status]{padding:12px;border:1px solid #3f3423;background:#211a10;overflow-wrap:anywhere}
+.placeholder-workspace{height:100%;display:grid;grid-template-columns:230px 1fr}
+.placeholder-workspace section{padding:32px}
+.placeholder-workspace aside{border-right:1px solid #3f3423}
+.cooking-view-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px;color:#b7a887}
+.cooking-view-tools small{flex:1;font-size:11px}
+.cooking-view-tools span{min-width:42px;font-variant-numeric:tabular-nums}
+.cooking-view-tools button{padding:4px 9px}
+.dish-name-dialog{width:520px;max-width:90vw;padding:40px;background:#1d1610;color:#eadfc3;border:1px solid #5a4930;border-radius:14px;box-shadow:0 24px 80px #000c}
+.dish-name-dialog::backdrop{background:#0b0805cc}
+.dish-name-dialog h2{margin-top:0;font-size:25px;font-weight:600}
+.dish-name-dialog p{overflow-wrap:anywhere}
+.dish-name-dialog input{display:block;width:100%;margin-top:8px;background:#2b2215;border-color:#5a4930}
+.dish-name-dialog input[aria-invalid=true]{border-color:#e0704f}
+.dish-name-dialog button{border-radius:9999px}
+.dish-name-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;flex-wrap:wrap}
+.cooking-workspace button.cooking-primary-action{display:block;width:100%;margin-top:12px;min-height:50px;padding:12px 18px;border:0;border-radius:9999px;background:#f19f36;color:#2a1a06;font-size:15px;font-weight:700;box-shadow:0 3px 14px #f19f3633}
+.cooking-workspace button.cooking-primary-action:hover:not(:disabled){background:#ffb54e}
+.cooking-workspace button.cooking-primary-action:focus-visible{outline:3px solid #ffb340;outline-offset:3px}
+.cooking-workspace button.cooking-primary-action:disabled{background:#33280f;color:#8b7d61;border:1px solid #3f3423;box-shadow:none;cursor:not-allowed}
+.cooking-workspace button.cooking-open-output{display:block;width:100%;margin-top:10px;min-height:42px;padding:10px 14px;border-radius:9999px;border:1px solid #5a4930;color:#eadfc3;background:transparent}
+.cooking-workspace button.cooking-open-output:hover:not(:disabled){background:#382c1a}
+.cooking-workspace header>span{color:#8b7d61}
+.cooking-workflow h3{margin-top:4px}
+.cooking-workflow ol{list-style:none;margin:24px 0 0;padding:0}
+.cooking-workflow li{display:flex;gap:12px;padding:0 0 26px;position:relative}
+.cooking-workflow li:not(:last-child):before{content:'';position:absolute;left:13px;top:30px;bottom:4px;width:1px;background:#3f3423}
+.cooking-workflow .step-number{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #5a4930;border-radius:50%;color:#8b7d61;font-size:12px}
+.cooking-workflow strong{display:block;padding-top:3px;font-size:14px;color:#eadfc3}
+.cooking-workflow p{margin:8px 0 0;font-size:12px;line-height:1.7;color:#8b7d61}
+.cooking-workflow .current .step-number{background:#f19f36;border-color:#ffb340;color:#2a1a06}
+.cooking-workflow .current strong{color:#ffcf8a}
+.cooking-workflow .done .step-number{background:#2b2215;border-color:#5a4930;color:#b7a887}
+.cooking-canvas-container{position:relative;isolation:isolate}
+.cooking-import-overlay{position:absolute;inset:0;display:grid;place-items:center;background:#120e08d9;border:1px dashed #5a4930;text-align:center;padding:28px}
+.cooking-import-overlay>div{max-width:400px}
+.cooking-import-overlay h2{font-family:var(--font-display,system-ui);font-size:22px;font-weight:600;line-height:1.5;margin:12px 0 24px;color:#eadfc3}
+.cooking-import-icon{display:grid;place-items:center;margin:auto;width:60px;height:60px;border:1px solid #5a4930;border-radius:14px;font-size:38px;font-weight:300;color:#b7a887}
+.cooking-import-overlay button{min-height:44px;padding:10px 26px;border:0;border-radius:9999px;background:#f19f36;color:#2a1a06;font-weight:700}
+.cooking-import-overlay button:hover:not(:disabled){background:#ffb54e}

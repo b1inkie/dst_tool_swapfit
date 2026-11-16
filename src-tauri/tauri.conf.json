@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DST SwapFit",
+  "version": "0.1.0",
+  "identifier": "com.dst-swapfit.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [{
+      "label":"main","title":"DST SwapFit",
+      "width":1440,"height":920,"minWidth":1000,"minHeight":700,
+      "center":true,"backgroundColor":"#00000000",
+      "transparent":true,"decorations":false,"shadow":false
+    }],
+    "security": {"csp":"default-src 'self'; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost"}
+  },
+  "plugins": {"updater": {"pubkey":"","endpoints":[]}},
+  "bundle": {"active":false,"icon":["icons/icon.ico","icons/icon.png","icons/icon.icns"]}
+}

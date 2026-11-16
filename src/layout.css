@@ -1,0 +1,1 @@
+html,body,#root,main{height:100%;min-width:1000px}main{display:flex;flex-direction:column}header{flex-shrink:0}.layout{flex:1;min-height:0;overflow:hidden}aside{overflow-y:auto}.stage{overflow:auto}.stage canvas{width:100%;height:auto}.channel small,.selected small{font-size:11px}aside button.channel,aside button.selected{padding:5px 7px}

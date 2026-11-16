@@ -1,0 +1,45 @@
+/* 饥荒主题：炭黑棕底、羊皮纸文字、火光橙点缀，手绘感边框。 */
+:root{
+ --bg:#171208;--surface:#211a10;--surface-raised:#2b2215;--surface-hover:#382c1a;
+ --text:#eadfc3;--text-secondary:#b7a887;--text-muted:#8b7d61;
+ --action:#f19f36;--action-hover:#ffb54e;--on-action:#2a1a06;
+ --accent:#ffb340;--border:#3f3423;--border-hair:#ffffff14;--danger:#ff8f76;
+ --radius-sm:6px;--radius-md:10px;--radius-pill:9999px;
+ --font-display:"Ink Free","Segoe Print","Bradley Hand",var(--font-body);
+ --font-body:"Segoe UI",-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;background:var(--surface-raised);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px}
+button{cursor:pointer;transition:background .16s ease,border-color .16s ease}
+button:hover:not(:disabled){background:var(--surface-hover);border-color:#5a4930}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:active{transform:translateY(1px)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+::selection{background:var(--action);color:var(--on-action)}
+header{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--border)}
+header span{flex:1;color:var(--text-secondary)}
+.layout{display:grid;grid-template-columns:230px minmax(500px,1fr) 280px;gap:1px;background:var(--border)}
+aside,.stage{background:var(--surface);padding:16px;min-width:0}
+aside select,aside button{display:block;width:100%;margin:8px 0}
+h1,h2,h3{font-family:var(--font-display);letter-spacing:.01em}
+h3{font-size:15px;font-weight:600;margin-top:22px}
+small{display:block;color:var(--text-secondary)}
+.stage canvas{display:block;width:100%;background-color:#120e08;background-image:linear-gradient(45deg,#1c1610 25%,transparent 25%),linear-gradient(-45deg,#1c1610 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1c1610 75%),linear-gradient(-45deg,transparent 75%,#1c1610 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0;touch-action:none}
+footer{display:flex;gap:8px;align-items:center;margin:12px 0}
+footer input[type=range]{flex:1;min-width:40px}
+input[type=number]{width:85px;margin:6px}
+label{display:block}
+.selected{border-color:var(--accent);background:var(--surface-hover)}
+.channel{text-align:left}
+.error{background:#3d1c12;color:var(--danger);border:1px solid #5c2b1c;padding:10px;overflow-wrap:anywhere}
+.error button{float:right;background:transparent;border:0;color:inherit}
+p{line-height:1.65;color:var(--text-secondary)}
+*{scrollbar-width:thin;scrollbar-color:#5a4930 transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#5a4930;border-radius:9999px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#8b6d3d}
+::-webkit-scrollbar-thumb:active{background:var(--accent)}
+::-webkit-scrollbar-corner{background:transparent}
+@media(max-width:1100px){.layout{grid-template-columns:180px minmax(350px,1fr) 230px}header{flex-wrap:wrap}}
