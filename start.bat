@@ -29,7 +29,6 @@ for /f "tokens=5" %%P in ('netstat -ano ^| findstr :1420 ^| findstr LISTENING') 
 )
 
 if not exist "node_modules\" (
-if not exist "node_modules\" (
     echo Installing dependencies...
     call npm ci
     if errorlevel 1 goto :failed
