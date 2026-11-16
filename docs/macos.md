@@ -1,6 +1,6 @@
 # macOS 构建与验证
 
-GitHub Actions `macOS build and test` 在 Apple Silicon（macos-14）和 Intel（macos-15-intel）runner 上分别执行 TS 测试、Rust 测试、Tauri app/DMG 构建、图集与模板完整性校验、代码签名校验和 12 秒进程启动检查。
+GitHub Actions `macOS build and test` 在 Apple Silicon（macos-15）和 Intel（macos-15-intel）runner 上分别执行 TS 测试、Rust 测试、Tauri app/DMG 构建、图集与模板完整性校验、代码签名校验和 12 秒进程启动检查。
 
 配置由 Tauri 自动合并 `src-tauri/tauri.macos.conf.json`。透明无边框窗口启用 `macos-private-api`，面向直接下载分发，不以 Mac App Store 为目标。
 
