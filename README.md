@@ -50,6 +50,9 @@ powershell -ExecutionPolicy Bypass -File scripts/package-windows.ps1
 
 饥荒风视觉：炭棕背景 `#171208`、表面 `#211a10/#2b2215`、边框 `#3f3423`、羊皮纸文字 `#eadfc3/#b7a887/#8b7d61`、火光橙主按钮 `#f19f36` 与点缀 `#ffb340`、手写体标题（Ink Free / Segoe Print，中文回退系统字体）。令牌集中在 `src/style.css` 的 `:root`。窗口为无边框透明圆角壳（12px，最大化取消裁剪），标题栏自定义。活动栏剪影图标未选中 `#8b7d61`、选中 `#ffb340`。
 
+## 许可
+
+源代码采用 [MIT License](LICENSE)；随 Release 分发的游戏素材归 Klei Entertainment 所有，不适用 MIT，约定见 [NOTICES.md](NOTICES.md)。
 ## 已知限制
 
 - SCML 采样支持 linear/instant 关键帧与骨骼父子变换；复杂曲线与逐关键帧 pivot 显式报错，不做错误预览。
