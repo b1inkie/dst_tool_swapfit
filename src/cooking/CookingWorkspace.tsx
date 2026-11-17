@@ -119,7 +119,12 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
    acceptPicture(image,fileName,job,candidate)
   }catch(e){if(sequence===importSequence.current)setError(String(e))}finally{if(sequence===importSequence.current)setBusy(false)}
  }
- const importPaths=async(paths:string[])=>{try{if(!loaded)throw Error(profile.missingTemplate);if(paths.length!==1)throw Error('请一次拖入一张图片');const [file]=await invoke<FileData[]>('read_imports',{paths});if(!/\.(png|jpg|jpeg|webp)$/i.test(file.path))throw Error('制作工作区仅接收图片');await importPicture(new Uint8Array(file.bytes),file.path.split(/[\\/]/).pop()!)}catch(e){setError(String(e))}}
+ const importPaths=async(paths:string[])=>{try{
+  // Tauri desktop delivers all drops through the window-level event; character
+  // packages dropped anywhere in the handheld workspace route to the character importer.
+  if(kind==='handheld'&&paths.length&&paths.every(p=>/\.(zip|scml)$/i.test(p))){await importCharacter(paths);return}
+  if(!loaded)throw Error(profile.missingTemplate);if(paths.length!==1)throw Error('请一次拖入一张图片');const [file]=await invoke<FileData[]>('read_imports',{paths});if(!/\.(png|jpg|jpeg|webp)$/i.test(file.path))throw Error('制作工作区仅接收图片');await importPicture(new Uint8Array(file.bytes),file.path.split(/[\\/]/).pop()!)
+ }catch(e){setError(String(e))}}
 // Character import: browser drops File objects; desktop paths go through read_imports.
  async function importCharacterBrowser(files:File[]){
   for(const file of files)await importCharacterData(file.name,new Uint8Array(await file.arrayBuffer()))
@@ -130,7 +135,7 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
   if(/\.zip$/i.test(fileName)){
    const pkg=await importZip(fileName,bytes)
    if(!pkg.builds.length)throw Error(`${fileName} 中没有 build，无法作为预览人物`)
-   for(const build of pkg.builds)imported.push({id:pkg.id+':'+build.id,label:`${build.id} · ${fileName}`,buildId:build.id,package:pkg})
+   for(const build of pkg.builds)imported.push({id:pkg.id+':'+build.id,label:`${build.id} / ZIP`,buildId:build.id,package:pkg})
   }else if(/\.scml$/i.test(fileName)){
    const pkg=await importScml(fileName,bytes,async relative=>{
     if(desktopPath){
@@ -143,7 +148,7 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
     const image=await decodeImage(new Uint8Array(await match.arrayBuffer()))
     return {id:relative,width:image.width,height:image.height,rgba:image.getContext('2d')!.getImageData(0,0,image.width,image.height).data}
    })
-   for(const build of pkg.builds)imported.push({id:pkg.id+':'+build.id,label:`${build.id} · ${fileName}`,buildId:build.id,package:pkg})
+   for(const build of pkg.builds)imported.push({id:pkg.id+':'+build.id,label:`${build.id} / SCML`,buildId:build.id,package:pkg})
   }else throw Error('仅支持人物 ZIP 或 SCML 文件')
   setCharacters(existing=>[...(existing??[]).filter(old=>!imported.some(item=>item.id===old.id)),...imported]);setCharacterId(imported[0].id)
   setStatus(`已导入人物：${imported.map(item=>item.buildId).join('、')}。切换后武器调整保持不变。`)
@@ -165,7 +170,7 @@ async function importCharacter(paths:string[]){
   const project:Project={...emptyProject(),overrides:[{id:'cooking',enabled:true,targetSymbol:kleiHash(loaded.preset.targetSymbol),source:{packageId:food.id,buildId:food.builds[0].id,symbol:loaded.sourceHash},fixedFrame:loaded.preset.fixedFrame}]}
   const anim=loaded.scene.animations.find(a=>a.id===animationId)
   const elements=visibleSceneElements(anim?.frames[0]??[],kind)
-  const defaultCharacter={id:'wilson',label:'Wilson · wilson.zip',buildId:loaded.sceneBuild.builds[0].id,package:loaded.sceneBuild}
+  const defaultCharacter={id:'wilson',label:'wilson / ZIP',buildId:loaded.sceneBuild.builds[0].id,package:loaded.sceneBuild}
   const list=[defaultCharacter,...(characters??[]).filter(c=>c.id!=='wilson')]
   const active=list.find(c=>c.id===characterId)??defaultCharacter
   const channels=collectChannels(new Map([[active.package.id,active.package],[food.id,food]]),project,{packageId:active.package.id,buildId:active.buildId,symbol:0},elements)
@@ -275,7 +280,7 @@ async function importCharacter(paths:string[]){
     {kind==='handheld'&&<div className="character-panel">
      <h3>预览人物</h3>
      <select aria-label="预览人物 build" value={characterId} disabled={busy||!loaded} onChange={e=>setCharacterId(e.target.value)}>
-      {loaded&&<option value="wilson">Wilson · wilson.zip</option>}
+      {loaded&&<option value="wilson">wilson / ZIP</option>}
       {characters?.map(c=><option key={c.id} value={c.id}>{c.label}</option>)}
      </select>
      <button onClick={()=>void chooseCharacter()} disabled={busy||!loaded}>导入人物动画</button>

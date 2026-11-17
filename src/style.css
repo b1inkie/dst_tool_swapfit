@@ -11,6 +11,8 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;-webkit-font-smoothing:antialiased}
 button,select,input{font:inherit;background:var(--surface-raised);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--text-secondary) 50%),linear-gradient(135deg,var(--text-secondary) 50%,transparent 50%);background-position:calc(100% - 18px) calc(50% - 2px),calc(100% - 13px) calc(50% - 2px);background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+select option{background:#2b2215;color:#eadfc3}
 button{cursor:pointer;transition:background .16s ease,border-color .16s ease}
 button:hover:not(:disabled){background:var(--surface-hover);border-color:#5a4930}
 button:disabled{opacity:.45;cursor:not-allowed}

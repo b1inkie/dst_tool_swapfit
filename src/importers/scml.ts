@@ -77,5 +77,5 @@ export async function importScml(name:string,bytes:Uint8Array,loadTexture:(path:
   // Include texture bytes in content identity: changing a PNG invalidates the package ID.
   const chunks=[bytes,...textures.map(t=>new Uint8Array(t.rgba.buffer,t.rgba.byteOffset,t.rgba.byteLength))],total=chunks.reduce((n,c)=>n+c.length,0),combined=new Uint8Array(total);let offset=0
   for(const c of chunks){combined.set(c,offset);offset+=c.length}
-  return {id:await contentId(combined),name,builds:[{id:'scml:build',name:buildName,symbols}],animations,textures,names}
+  return {id:await contentId(combined),name,builds:[{id:buildName,name:buildName,symbols}],animations,textures,names}
 }
