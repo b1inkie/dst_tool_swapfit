@@ -23,10 +23,10 @@ export default function ThemedSelect({value,onChange,options,ariaLabel,disabled}
  }
  return <div className={'themed-select'+(open?' open':'')} ref={root} aria-label={ariaLabel}>
   <button type="button" className="themed-select-header" aria-haspopup="listbox" aria-expanded={open} aria-label={ariaLabel} onClick={()=>setOpen(!open)} onKeyDown={keyDown}>
-   <span className="themed-select-value">{selected.label}</span><span className="themed-select-arrow" aria-hidden="true">▾</span>
+   <span className="themed-select-value">{selected.label}</span><span className="themed-select-arrow" aria-hidden="true"/>
   </button>
   {open&&<ul className="themed-select-list" role="listbox" aria-label={ariaLabel}>
-   {options.map((option,index)=>{return <li key={option.value} role="option" aria-selected={option.value===selected.value} className={'themed-select-option'+(index===active?' active':'')+(option.value===selected.value?' selected':'')} onMouseEnter={()=>setActive(index)} onMouseDown={event=>{event.preventDefault();commit(index)}}>{option.label}</li>})}
+   {options.map((option,index)=>{return <li key={option.value} role="option" aria-selected={option.value===selected.value} className={'themed-select-option'+(index===active?' active':'')+(option.value===selected.value?' selected':'')} onMouseEnter={()=>setActive(index)} onMouseDown={event=>{event.preventDefault();commit(index)}}><span className="themed-select-option-label">{option.label}</span><span className="themed-select-check" aria-hidden="true">✓</span></li>})}
   </ul>}
  </div>
 }
