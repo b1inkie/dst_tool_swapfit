@@ -1,6 +1,7 @@
 import {useEffect,useState,type ReactNode} from 'react'
 import {isTauri} from '@tauri-apps/api/core'
 import {getCurrentWindow} from '@tauri-apps/api/window'
+import Tooltip from './ui/Tooltip'
 import './window-frame.css'
 
 export default function WindowFrame({children}:{children:ReactNode}){
@@ -28,9 +29,9 @@ export default function WindowFrame({children}:{children:ReactNode}){
     <span>DST SwapFit</span><span className="window-subtitle">贴图对位器</span>
    </div>
    <div className="window-controls">
-    <button disabled={!desktop} aria-label="最小化窗口" title="最小化" onClick={()=>void action('minimize')}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" stroke="currentColor"/></svg></button>
-    <button disabled={!desktop} aria-label={maximized?'还原窗口':'最大化窗口'} title={maximized?'还原':'最大化'} onClick={()=>void action('maximize')}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">{maximized?<path d="M5 5V3h8v8h-2M3 5h8v8H3z" stroke="currentColor"/>:<rect x="3.5" y="3.5" width="9" height="9" stroke="currentColor"/>}</svg></button>
-    <button disabled={!desktop} className="window-close" aria-label="关闭窗口" title="关闭" onClick={()=>void action('close')}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.3"/></svg></button>
+    <Tooltip content="最小化" side="bottom"><button disabled={!desktop} aria-label="最小化窗口" onClick={()=>void action('minimize')}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" stroke="currentColor"/></svg></button></Tooltip>
+    <Tooltip content={maximized?'还原':'最大化'} side="bottom"><button disabled={!desktop} aria-label={maximized?'还原窗口':'最大化窗口'} onClick={()=>void action('maximize')}><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">{maximized?<path d="M5 5V3h8v8h-2M3 5h8v8H3z" stroke="currentColor"/>:<rect x="3.5" y="3.5" width="9" height="9" stroke="currentColor"/>}</svg></button></Tooltip>
+    <Tooltip content="关闭" side="bottom"><button disabled={!desktop} className="window-close" aria-label="关闭窗口" onClick={()=>void action('close')}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.3"/></svg></button></Tooltip>
    </div>
   </div>
   {error&&<div className="window-error" role="alert">{error}<button onClick={()=>setError('')} aria-label="关闭窗口错误提示">×</button></div>}

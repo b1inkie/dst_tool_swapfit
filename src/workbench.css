@@ -42,9 +42,9 @@
 .cooking-workspace button.cooking-open-output:hover:not(:disabled){background:#382c1a}
 .cooking-workspace header>span{color:#8b7d61}
 .cooking-workflow h3{margin-top:4px}
-.cooking-workflow ol{list-style:none;margin:24px 0 0;padding:0}
-.cooking-workflow li{display:flex;gap:12px;padding:0 0 26px;position:relative}
-.cooking-workflow li:not(:last-child):before{content:'';position:absolute;left:13px;top:30px;bottom:4px;width:1px;background:#3f3423}
+.cooking-workflow>ol{list-style:none;margin:24px 0 0;padding:0}
+.cooking-workflow>ol>li{display:flex;gap:12px;padding:0 0 26px;position:relative}
+.cooking-workflow>ol>li:not(:last-child):before{content:'';position:absolute;left:13px;top:30px;bottom:4px;width:1px;background:#3f3423}
 .cooking-workflow .step-number{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #5a4930;border-radius:50%;color:#8b7d61;font-size:12px}
 .cooking-workflow strong{display:block;padding-top:3px;font-size:14px;color:#eadfc3}
 .cooking-workflow p{margin:8px 0 0;font-size:12px;line-height:1.7;color:#8b7d61}

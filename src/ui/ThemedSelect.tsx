@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react'
+import Tooltip from './Tooltip'
 import './themed-select.css'
 export type ThemedOption=Readonly<{value:string;label:string}>
 // Native <select> popups cannot be themed on Windows WebView2; this component
@@ -26,7 +27,7 @@ export default function ThemedSelect({value,onChange,options,ariaLabel,disabled}
    <span className="themed-select-value">{selected.label}</span><span className="themed-select-arrow" aria-hidden="true"/>
   </button>
   {open&&<ul className="themed-select-list" role="listbox" aria-label={ariaLabel}>
-   {options.map((option,index)=>{return <li key={option.value} role="option" aria-selected={option.value===selected.value} className={'themed-select-option'+(index===active?' active':'')+(option.value===selected.value?' selected':'')} onMouseEnter={()=>setActive(index)} onMouseDown={event=>{event.preventDefault();commit(index)}}><span className="themed-select-option-label">{option.label}</span><span className="themed-select-check" aria-hidden="true">✓</span></li>})}
+   {options.map((option,index)=><Tooltip key={option.value} content={option.label} side="right"><li role="option" aria-selected={option.value===selected.value} className={'themed-select-option'+(index===active?' active':'')+(option.value===selected.value?' selected':'')} onMouseEnter={()=>setActive(index)} onMouseDown={event=>{event.preventDefault();commit(index)}}><span className="themed-select-option-label">{option.label}</span><span className="themed-select-check" aria-hidden="true">✓</span></li></Tooltip>)}
   </ul>}
  </div>
 }
