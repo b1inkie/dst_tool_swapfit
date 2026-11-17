@@ -120,29 +120,40 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
   }catch(e){if(sequence===importSequence.current)setError(String(e))}finally{if(sequence===importSequence.current)setBusy(false)}
  }
  const importPaths=async(paths:string[])=>{try{if(!loaded)throw Error(profile.missingTemplate);if(paths.length!==1)throw Error('请一次拖入一张图片');const [file]=await invoke<FileData[]>('read_imports',{paths});if(!/\.(png|jpg|jpeg|webp)$/i.test(file.path))throw Error('制作工作区仅接收图片');await importPicture(new Uint8Array(file.bytes),file.path.split(/[\\/]/).pop()!)}catch(e){setError(String(e))}}
- async function importCharacter(paths:string[]){
+// Character import: browser drops File objects; desktop paths go through read_imports.
+ async function importCharacterBrowser(files:File[]){
+  for(const file of files)await importCharacterData(file.name,new Uint8Array(await file.arrayBuffer()))
+ }
+ async function importCharacterData(fileName:string,bytes:Uint8Array,desktopPath?:string){
+  if(!loaded)return
+  const imported:CharacterBuild[]=[]
+  if(/\.zip$/i.test(fileName)){
+   const pkg=await importZip(fileName,bytes)
+   if(!pkg.builds.length)throw Error(`${fileName} 中没有 build，无法作为预览人物`)
+   for(const build of pkg.builds)imported.push({id:pkg.id+':'+build.id,label:`${build.id} · ${fileName}`,buildId:build.id,package:pkg})
+  }else if(/\.scml$/i.test(fileName)){
+   const pkg=await importScml(fileName,bytes,async relative=>{
+    if(desktopPath){
+     const image=await decodeImage(new Uint8Array(await invoke<number[]>('read_related',{source:desktopPath,relative})))
+     return {id:relative,width:image.width,height:image.height,rgba:image.getContext('2d')!.getImageData(0,0,image.width,image.height).data}
+    }
+    const files=[...(characterInput.current?.files??[])]
+    const match=files.find(f=>f.name.replaceAll('\\','/')===relative)
+    if(!match)throw Error(`浏览器模式需同时选入关联图片：${relative}`)
+    const image=await decodeImage(new Uint8Array(await match.arrayBuffer()))
+    return {id:relative,width:image.width,height:image.height,rgba:image.getContext('2d')!.getImageData(0,0,image.width,image.height).data}
+   })
+   for(const build of pkg.builds)imported.push({id:pkg.id+':'+build.id,label:`${build.id} · ${fileName}`,buildId:build.id,package:pkg})
+  }else throw Error('仅支持人物 ZIP 或 SCML 文件')
+  setCharacters(existing=>[...(existing??[]).filter(old=>!imported.some(item=>item.id===old.id)),...imported]);setCharacterId(imported[0].id)
+  setStatus(`已导入人物：${imported.map(item=>item.buildId).join('、')}。切换后武器调整保持不变。`)
+ }
+async function importCharacter(paths:string[]){
   if(!loaded)return
   setBusy(true);setError('')
   try{
    const files=await invoke<FileData[]>('read_imports',{paths})
-   const imported:CharacterBuild[]=[]
-   for(const file of files){
-    const fileName=file.path.split(/[\\/]/).pop()!
-    if(/\.zip$/i.test(file.path)){
-     const pkg=await importZip(fileName,new Uint8Array(file.bytes))
-     if(!pkg.builds.length)throw Error(`${fileName} 中没有 build，无法作为预览人物`)
-     for(const build of pkg.builds)imported.push({id:pkg.id+':'+build.id,label:`${build.id} · ${fileName}`,buildId:build.id,package:pkg})
-    }else if(/\.scml$/i.test(file.path)){
-     const pkg=await importScml(fileName,new Uint8Array(file.bytes),async relative=>{
-      const image=await decodeImage(new Uint8Array(await invoke<number[]>('read_related',{source:file.path,relative})))
-      return {id:relative,width:image.width,height:image.height,rgba:image.getContext('2d')!.getImageData(0,0,image.width,image.height).data}
-     })
-     for(const build of pkg.builds)imported.push({id:pkg.id+':'+build.id,label:`${build.id} · ${fileName}`,buildId:build.id,package:pkg})
-    }else throw Error('仅支持人物 ZIP 或 SCML 文件')
-   }
-   if(!imported.length)throw Error('未导入任何人物 build')
-   setCharacters(existing=>[...existing.filter(old=>!imported.some(item=>item.id===old.id)),...imported]);setCharacterId(imported[0].id)
-   setStatus(`已导入人物：${imported.map(item=>item.buildId).join('、')}。切换后武器调整保持不变。`)
+   for(const file of files)await importCharacterData(file.path.split(/[\\/]/).pop()!,new Uint8Array(file.bytes),file.path)
   }catch(e){setError(String(e))}finally{setBusy(false)}
  }
  const chooseCharacter=async()=>{if(!isTauri()){characterInput.current?.click();return}const paths=await open({multiple:true,filters:[{name:'人物动画',extensions:['zip','scml']}]});if(paths)void importCharacter(Array.isArray(paths)?paths:[paths])}
@@ -158,7 +169,7 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
   const list=[defaultCharacter,...(characters??[]).filter(c=>c.id!=='wilson')]
   const active=list.find(c=>c.id===characterId)??defaultCharacter
   const channels=collectChannels(new Map([[active.package.id,active.package],[food.id,food]]),project,{packageId:active.package.id,buildId:active.buildId,symbol:0},elements)
-  return {anim,channels}
+  return {anim,channels,character:active}
  },[loaded,rendered,animationId,standby,kind,characters,characterId])
  const sceneView:Mat=multiply(viewMatrix(viewport),[1,0,0,1,450,430])
  const editBase=useMemo(()=>{
@@ -250,7 +261,7 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
   {nameDialog}
   <header><strong>{profile.title}</strong><span>固定模板画布 · 只修改图片内容</span><button onClick={choose} disabled={busy||!loaded}>导入{profile.label}图片</button><button onClick={undo} disabled={!past.current.length}>撤销</button><button onClick={redo} disabled={!future.current.length}>重做</button></header>
   <input hidden ref={input} type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const f=e.target.files?.[0];if(f)void f.arrayBuffer().then(b=>importPicture(new Uint8Array(b),f.name))}}/>
-  <input hidden ref={characterInput} type="file" multiple accept=".zip,.scml" onChange={e=>{const files=[...e.target.files??[]];if(files.length)void Promise.all(files.map(async f=>({name:f.name,bytes:new Uint8Array(await f.arrayBuffer())}))).then(async list=>{for(const f of list){await importCharacter([{path:f.name,bytes:[...f.bytes]} as FileData])}}).catch(err=>setError(String(err)));e.target.value=''}}/>
+  <input hidden ref={characterInput} type="file" multiple accept=".zip,.scml" onChange={e=>{const files=[...e.target.files??[]];if(files.length)void importCharacterBrowser(files).catch(err=>setError(String(err)));e.target.value=''}}/>
   {error&&<div className="error" role="alert">{error}<button onClick={()=>setError('')}>关闭</button></div>}
   <div className="layout">
    <aside className="cooking-workflow" aria-label={`${profile.label}制作流程`}>
@@ -270,7 +281,7 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
      <button onClick={()=>void chooseCharacter()} disabled={busy||!loaded}>导入人物动画</button>
      <div className="character-dropzone" aria-label="人物动画拖入区" onDragOver={e=>e.preventDefault()} onDrop={e=>{
       e.preventDefault();e.stopPropagation()
-      if(!isTauri()){const files=[...e.dataTransfer.files].filter(f=>/\.(zip|scml)$/i.test(f.name));if(files.length)void Promise.all(files.map(async f=>({name:f.name,bytes:new Uint8Array(await f.arrayBuffer())}))).then(list=>{const params=list.map(x=>({path:x.name,bytes:[...x.bytes]}));return importCharacter(params.map(p=>p.path).map((p,i)=>({path:p,bytes:params[i].bytes}))}).catch(e=>setError(String(e)));return}
+      if(!isTauri()){const files=[...e.dataTransfer.files].filter(f=>/\.(zip|scml)$/i.test(f.name));if(!files.length)return;void importCharacterBrowser(files).catch(err=>setError(String(err)));return}
       const paths=[...e.dataTransfer.files].map(f=>(f as File&{path?:string}).path??'').filter(Boolean)
       if(paths.length)void importCharacter(paths)
      }}>拖入人物 ZIP / SCML</div>
