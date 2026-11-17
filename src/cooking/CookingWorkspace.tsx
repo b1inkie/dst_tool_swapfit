@@ -18,6 +18,7 @@ import {rotationCursor} from './cursors'
 import DishNameDialog from './DishNameDialog'
 import {imageStem,validDishName} from './naming'
 import {chooseSceneAnimation,visibleSceneElements,workspaceProfiles,type WorkspaceKind} from '../workspaces/profile'
+import ThemedSelect from '../ui/ThemedSelect'
 
 type Preset={id:string;name:string;workspace?:WorkspaceKind;scene:string;sceneBuild?:string;templateDir:string;scml:string;image:string;applyAllImages?:boolean;targetSymbol:string;sourceSymbol:string;animation?:string;facing?:number;fixedFrame?:number}
 type Catalog={root:string;presets:Preset[]}
@@ -279,10 +280,10 @@ async function importCharacter(paths:string[]){
     </ol>
     {kind==='handheld'&&<div className="character-panel">
      <h3>预览人物</h3>
-     <select aria-label="预览人物 build" value={characterId} disabled={busy||!loaded} onChange={e=>setCharacterId(e.target.value)}>
-      {loaded&&<option value="wilson">wilson / ZIP</option>}
-      {characters?.map(c=><option key={c.id} value={c.id}>{c.label}</option>)}
-     </select>
+     <ThemedSelect ariaLabel="预览人物 build" value={characterId} disabled={busy||!loaded} onChange={setCharacterId} options={[
+      ...(loaded?[{value:'wilson',label:'wilson / ZIP'}]:[]),
+      ...(characters??[]).map(c=>({value:c.id,label:c.label})),
+     ]}/>
      <button onClick={()=>void chooseCharacter()} disabled={busy||!loaded}>导入人物动画</button>
      <div className="character-dropzone" aria-label="人物动画拖入区" onDragOver={e=>e.preventDefault()} onDrop={e=>{
       e.preventDefault();e.stopPropagation()
