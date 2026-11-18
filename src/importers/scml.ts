@@ -6,7 +6,9 @@ import {multiply} from '../core/matrix'
 type Node=Record<string,any>
 const array=(v:any):Node[]=>v===undefined?[]:Array.isArray(v)?v:[v]
 const number=(v:any,fallback=0)=>{const n=v===undefined?fallback:Number(v);if(!Number.isFinite(n))throw Error('SCML 数值无效');return n}
-export async function importScml(name:string,bytes:Uint8Array,loadTexture:(path:string)=>Promise<Texture>):Promise<AssetPackage>{
+export class MissingScmlImage extends Error {constructor(public path:string){super(`SCML 缺少关联图片：${path}`)}}
+export type ScmlOptions={buildOnly?:boolean;onMissingImage?:(path:string)=>void}
+export async function importScml(name:string,bytes:Uint8Array,loadTexture:(path:string)=>Promise<Texture>,options:ScmlOptions={}):Promise<AssetPackage>{
   if(bytes.length>16*1024*1024)throw Error('SCML 文件过大')
   const xml=new TextDecoder().decode(bytes)
   if(/<!DOCTYPE|<!ENTITY/i.test(xml)||XMLValidator.validate(xml)!==true)throw Error('SCML XML 无效或包含不支持的声明')
@@ -18,18 +20,23 @@ export async function importScml(name:string,bytes:Uint8Array,loadTexture:(path:
     if(symbols.some(s=>s.hash===symbol))throw Error('SCML folder 名称/哈希重复')
     names[symbol]=String(folder.name??folder.id)
     for(const f of array(folder.file)){
-      const path=safePath(String(f.name)),texture=await loadTexture(path),frame=number(f.id),pivotX=number(f.pivot_x,0),pivotY=number(f.pivot_y,1)
+      const path=safePath(String(f.name)),frame=number(f.id),pivotX=number(f.pivot_x,0),pivotY=number(f.pivot_y,1)
+      let texture:Texture
+      try{texture=await loadTexture(path)}catch(e){
+        if(options.buildOnly&&e instanceof MissingScmlImage){options.onMissingImage?.(path);continue}
+        throw e
+      }
       if(!Number.isInteger(frame)||frame<0)throw Error('SCML 图片编号无效')
       const key=`${folder.id}:${f.id}`;if(files.has(key))throw Error('SCML 图片引用重复')
       const entry={symbol,frame,pivotX,pivotY,texture};files.set(key,entry);textures.push(texture)
       const w=texture.width,h=texture.height,x=-pivotX*w,y=-(1-pivotY)*h
       frames.push({index:frame,duration:1,parts:[{textureId:texture.id,triangles:[{x,y,u:0,v:0},{x:x+w,y,u:1,v:0},{x:x+w,y:y+h,u:1,v:1},{x,y,u:0,v:0},{x:x+w,y:y+h,u:1,v:1},{x,y:y+h,u:0,v:1}]}]})
     }
-    symbols.push({hash:symbol,name:names[symbol],frames})
+    if(frames.length)symbols.push({hash:symbol,name:names[symbol],frames})
   }
   const animations:AssetPackage['animations'][number][]=[], buildName=name.replace(/\.scml$/i,'')
   let frameBudget=0
-  for(const entity of array(root.entity))for(const anim of array(entity.animation)){
+  for(const entity of options.buildOnly?[]:array(root.entity))for(const anim of array(entity.animation)){
     const length=number(anim.length),step=number(anim.interval,1000/30)
     if(length<0||step<=0||step>10000)throw Error('SCML 长度或间隔无效')
     const count=Math.max(1,Math.ceil(length/step));frameBudget+=count;if(frameBudget>100000)throw Error('SCML 总帧数超过限制')

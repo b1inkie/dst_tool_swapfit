@@ -35,7 +35,7 @@ fn read_related(source: String, relative: String, state: State<'_,Imports>) -> R
     let relative=relative.replace('\\',"/"); let path=Path::new(&relative);
     if path.components().any(|c|!matches!(c,Component::Normal(_)|Component::CurDir)) || relative.contains(':') {return Err("关联资源路径不安全".into());}
     let parent=source.parent().ok_or("SCML 无父目录")?;
-    let resolved=fs::canonicalize(parent.join(path)).map_err(|e|e.to_string())?;
+    let resolved=fs::canonicalize(parent.join(path)).map_err(|e|if e.kind()==std::io::ErrorKind::NotFound{format!("RELATED_NOT_FOUND: {relative}")}else{format!("无法读取关联图片 {relative}：{e}")})?;
     if !resolved.starts_with(parent) {return Err("关联资源不允许越出 SCML 目录".into());}
     let ext=resolved.extension().and_then(|v|v.to_str()).unwrap_or("").to_lowercase();
     if !["png","jpg","jpeg","webp"].contains(&ext.as_str()) {return Err("只允许关联图片".into());}

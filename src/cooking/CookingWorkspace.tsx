@@ -8,7 +8,7 @@ import {emptyProject} from '../core/model'
 import {collectChannels} from '../core/channels'
 import {kleiHash} from '../importers/binary'
 import {importZip} from '../importers/zip'
-import {importScml} from '../importers/scml'
+import {importScml,MissingScmlImage} from '../importers/scml'
 import {drawItem} from '../renderer/canvas'
 import {decodeImage,defaultPlacement,pngBytes,rasterize,trimTransparent,type ImagePlacement} from './image'
 import {textureToScreen,gizmo,updateGesture,type Gesture} from './interaction'
@@ -133,7 +133,7 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
  }
  async function importCharacterData(fileName:string,bytes:Uint8Array,desktopPath?:string){
   if(!loaded)return
-  const imported:CharacterBuild[]=[]
+  const imported:CharacterBuild[]=[],missing:string[]=[]
   if(/\.zip$/i.test(fileName)){
    const pkg=await importZip(fileName,bytes)
    if(!pkg.builds.length)throw Error(`${fileName} 中没有 build，无法作为预览人物`)
@@ -141,7 +141,9 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
   }else if(/\.scml$/i.test(fileName)){
    const pkg=await importScml(fileName,bytes,async relative=>{
     if(desktopPath){
-     const image=await decodeImage(new Uint8Array(await invoke<number[]>('read_related',{source:desktopPath,relative})))
+     let raw:number[]
+     try{raw=await invoke<number[]>('read_related',{source:desktopPath,relative})}catch(e){if(String(e).startsWith('RELATED_NOT_FOUND:'))throw new MissingScmlImage(relative);throw e}
+     const image=await decodeImage(new Uint8Array(raw))
      return {id:relative,width:image.width,height:image.height,rgba:image.getContext('2d')!.getImageData(0,0,image.width,image.height).data}
     }
     const files=[...(characterInput.current?.files??[])]
@@ -149,11 +151,12 @@ export default function CookingWorkspace({active=true,kind='cooking'}:{active?:b
     if(!match)throw Error(`浏览器模式需同时选入关联图片：${relative}`)
     const image=await decodeImage(new Uint8Array(await match.arrayBuffer()))
     return {id:relative,width:image.width,height:image.height,rgba:image.getContext('2d')!.getImageData(0,0,image.width,image.height).data}
-   })
+   },{buildOnly:true,onMissingImage:path=>missing.push(path)})
+   if(!pkg.textures.length)throw Error('人物 SCML 没有可读取的图片，请检查关联 PNG 是否齐全')
    for(const build of pkg.builds)imported.push({id:pkg.id+':'+build.id,label:`${build.id} / SCML`,buildId:build.id,package:pkg})
   }else throw Error('仅支持人物 ZIP 或 SCML 文件')
   setCharacters(existing=>[...(existing??[]).filter(old=>!imported.some(item=>item.id===old.id)),...imported]);setCharacterId(imported[0].id)
-  setStatus(`已导入人物：${imported.map(item=>item.buildId).join('、')}。切换后武器调整保持不变。`)
+  setStatus(`已导入人物：${imported.map(item=>item.buildId).join('、')}。切换后武器调整保持不变。${missing.length?` 此工程缺少 ${missing.length} 张关联图片，已跳过：${missing.join('、')}`:''}`)
  }
 async function importCharacter(paths:string[]){
   if(!loaded)return
